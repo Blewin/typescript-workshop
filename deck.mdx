@@ -4,67 +4,52 @@ import TypescriptCode from './components/typescript-code'
 
 export { default as theme } from './theme'
 
+# Witamy na froncie
+<img src="./static/front.png" style={{width:'100%'}} alt="simple" />
+
+---
 <Head>
-  <title>React State Management using Redux workshop</title>
+  <title>React State Management workshop using Redux </title>
 </Head>
 
-# React - state management workshop
+# React State Management workshop using Redux
 
 Prepared by Bartosz Lewiński (based on previous workshop by Grzegorz Rozdzialik)
 
-Slides: TODO: http://bit.ly/react-state-slides
+Workshop repo: https://github.com/Blewin/react-redux-state-management-workshop
 
-Workshop repo: TODO: http://bit.ly/react-state-workshop
 
 ---
 
 ## What will we learn today?
-
-- Refresher on the previous workshops
-- Redux basic elements
-- Redux debugging
-- Redux middleware - hard way
-- Where to look for an easy way :)
-- When to use Context and when to use Redux
+- Solving problems from previous workshops - THE REDUX WAY
+- Redux basic elements (actions, reducers, selectors)
+- Redux & React debugging
 
 ---
 
 ## Problem we are solving - state management
 
-Prop drilling
-For big projects - this will be an overshoot
+Prop drilling can get out of hand.
+
+<img src="./static/prop-drilling.png" alt="Prop drilling" />
+
+
+Redux is an excellent solution for big projects
 
 ---
 
-## Redux Model
+## What will we do today
 
----
-## Spisek tresci
-
-
-## Task for today
-
-- Admin panel for a bank
-- Customer's account balance - a `Counter` component
-- Handle multiple customers
-- Display the total number of customers
-- All the data stored client-side (no API requests etc.)
-
----
-
-## Workshop guidelines
-
-- The task is split into steps
-- Branch `task-X` (e.g. `task-1`) - starting point for a step
-- Work on `task-X` branch. Use `npm run test` to verify your solution.
-- Clueless? Branch `task-X-solution` (e.g. `task-1-solution`) contains an example solution
-- Finished early? Take a look at _Advanced topics_ for each task and learn more.
+We'll work on previous codebase - with Redux!
+We'll implement basic elements, and see how they interact.
+If time will allow - we'll go deeper!
 
 ---
 
 ## Initial setup
 
-1. Pull the workshop repository TODO: http://bit.ly/react-state-workshop
+1. Pull the workshop repository: (ask for link in rocket chat)
 
 ```
 git clone git@github.com:Blewin/react-redux-state-management-workshop.git
@@ -80,372 +65,206 @@ Show auto-reload by modifying `src/App.js`.
 ```
 
 ---
+### Unidirectional data flow
 
-## Bottom-up approach
-
-1. Single `Counter` holding one customer's balance
-2. Multiple `Counter` components for different customers
-3. Display additional information - the number of customers
+<img src="./static/simple-store.png" alt="simple" />
 
 ---
 
-## Single `Counter` component
+## Redux Model
 
-<video
-  src="https://i.gyazo.com/9c9686ba5a8e04f49e4dbe60a6eeb721.mp4"
-  autoPlay="autoplay"
-  loop={true}
-  controls={true}
-/>
-
+<img src="./static/adv-store.png" alt="advanced" />
 ---
-
-```notes
-Each component can have its own state
-```
-
-<img src="./static/react-props-and-state.png" alt="props and state" />
-
----
-
-<img src="./static/single-counter.png" alt="Single counter" />
-
----
-
-export default Split
-
-```jsx
-class MyComponentWithState extends Component {
-  state = {
-    text: 'some value',
-    foo: 'another value',
-    array: [1, 2, 3],
-    object: {
-      a: true,
-      b: false,
-      c: 5,
-    },
+## State in Redux
+```js
+{
+  party: {
+    isJumping: false,
+  },
+  accounts: {
+    alice: 20,
+    bob: -2,
+    charlie: 13,
   }
+}
+```
+---
+## Actions in Redux
+
+```js
+dispatch({
+    type: 'JUMP'
+})
 ```
 
 ```js
-  render() {
-    return (
-      <div>
-        <div>Current value:{this.state.text}</div>
-
-        <button onClick={this._onClick}>
-          Click me
-        </button>
-      </div>
-    )
-  }
-
-  _onClick = () => {
-    this.setState({
-      text: 'the button has been clicked',
-      foo: '8',
-    })
-  }
-}
+dispatch({
+    type: 'JOIN PARTY',
+    userId: 'alice'
+    payload: {
+        partyNr: 3,
+    }
+})
 ```
-
 ---
-
-export default SplitRight
-
-<div>
-  <Components.p>
-    Run tests using <Components.inlineCode>npm run test</Components.inlineCode>
-  </Components.p>
-  <Components.p>Feel free to ask questions</Components.p>
-  <br />
-  <Components.h3>Advanced topics</Components.h3>
-  <Components.ul>
-    <Components.li>
-      <Components.a href="https://reactjs.org/docs/state-and-lifecycle.html#state-updates-may-be-asynchronous">
-        Asynchronous store updates
-      </Components.a>
-    </Components.li>
-  </Components.ul>
-</div>
-
-## `task-1`
-
-Implement a `Counter` in `src/components/Counter.js`.
-
-Use component's state to store the value.
-
-Features:
-
-- `+` button increments the value
-- `-` button decrements the value
-
-```notes
-Time to complete - 10 minutes
-```
-
----
-
-## `task-1-solution`
+## Reducer
 
 ```js
-_onMinusClicked = () => {
-  this.setState({
-    value: this.state.value - 1,
-  })
-}
+function partyReducer(state = INITIAL_STATE, action) {
+  switch (action.type) {
+    case 'JUMP':
+      return {
+        ...state,
+        isJumping: true,
+      };
 
-_onPlusClicked = () => {
-  this.setState({
-    value: this.state.value + 1,
-  })
-}
+    default:
+      return state;
+    }
+  }
+
 ```
 
 ---
 
-## Multiple `Counter` components
-
-<video
-  src="https://i.gyazo.com/4fc09c14f3bbca60b2de41cb08ca085d.mp4"
-  autoPlay="autoplay"
-  loop={true}
-  controls={true}
-/>
-
----
-
-<img
-  src="./static/multiple-counters.png"
-  alt="Multiple counters props propagation"
-/>
-
----
-
-export default Split
-
+# Before action was reduced
 ```js
-class App extends Component {
-  state = {
-    balances: [0]
-  }
-
-  render() {
-    return (
-      // render Counters based on this.state.balances
-    )
-  }
-}
+dispatch({
+    type: 'JUMP'
+})
 ```
 
 ```js
-class Counter extends Component {
-  // No need to use state here
-
-  render() {
-    const { value, onIncrement, onDecrement } = this.props
-
-    // Use value, onIncrement and onDecrement
-  }
+{
+    isJumping: false,
+    isWild: true,
 }
 ```
-
 ---
-
-export default SplitRight
-
-<div>
-  <Components.p>
-    Run tests using <Components.inlineCode>npm run test</Components.inlineCode>
-  </Components.p>
-  <Components.p>Feel free to ask questions</Components.p>
-  <br />
-  <Components.h3>Advanced topics</Components.h3>
-  <Components.ul>
-    <Components.li>
-      <Components.a href="https://reactkungfu.com/2015/08/pros-and-cons-of-using-immutability-with-react-js/">
-        Immutable data structures
-      </Components.a>
-      {' and '}
-      <Components.a href="https://facebook.github.io/immutable-js/">
-        Immutable.JS
-      </Components.a>
-    </Components.li>
-    <Components.li>
-      <Components.a href="https://reactjs.org/docs/components-and-props.html#function-and-class-components">
-        Stateless functional components
-      </Components.a>
-    </Components.li>
-  </Components.ul>
-</div>
-
-## `task-2`
-
-Implement `Counter` and edit `App` to correctly handle changes.
-
-Features:
-
-- button for opening new accounts
-- account balances are independent
-
-```notes
-Time to complete - 15 minutes
+# After action was reduced
+```js
+dispatch({
+    type: 'JUMP'
+})
 ```
-
----
-
-## `task-2-solution`
-
-Live coding
-
----
-
-## In a slightly larger application...
-
-<video
-  src="https://i.gyazo.com/e850016c62d4ca106bdfb5dfd5676ff7.mp4"
-  autoPlay="autoplay"
-  loop={true}
-  controls={true}
-/>
-
----
-
-### Prop drilling
-
-<img src="./static/prop-drilling.png" alt="Prop drilling" />
-
----
-
-export default SplitRight
-
-<div>
-  <Components.p>
-    Run tests using <Components.inlineCode>npm run test</Components.inlineCode>
-  </Components.p>
-  <Components.p>Feel free to ask questions</Components.p>
-  <br />
-  <Components.h3>Advanced topics</Components.h3>
-  <Components.ul>
-    <Components.li>
-      Unstated - pass state without prop drilling
-      <br />
-      <Components.a href="https://github.com/jamiebuilds/unstated">
-        https://github.com/jamiebuilds/unstated
-      </Components.a>
-    </Components.li>
-  </Components.ul>
-</div>
-
-## `task-3`
-
-Store the data in `App`. Pass necessary props to children.
-
-Features:
-
-- pass down account balances as props
-- pass down a way to update the account balances
-
-```notes
-Time to complete - 10 minutes
+```js
+{
+    isJumping: true,
+    isWild: true,
+}
 ```
-
 ---
 
-## `task-3-solution`
-
-Live coding
-
----
-
-## React Context to the rescue
-
-### How to avoid prop drilling
-
-and pass data _in the background_
-
----
-
-export default Split
+## Connect
 
 ```js
-const MyContext = React.createContext()
-// MyContext is an object: { Consumer, Provider }
-
-class App extends Component {
-  state = {
-    balances: [0],
-  }
-
-  render() {
-    const { balances } = this.state
-
-    return (
-      <MyContext.Provider value={balances}>
-        Other components here
-      </MyContext.Provider>
-    )
+function mapStateToProps(state, props) {
+  return {
+    value: state.accounts[props.userId],
   }
 }
+
+function mapDispatchToProps(dispatch, props) {
+  return {
+    onIncrement: () => dispatch({type: 'INCREMENT', id: props.userId}),
+    onDecrement: () => dispatch({type: 'DECREMENT', id: props.userId}),
+  }
+}
+
+export const ConnectedCounter = connect(mapStateToProps, mapDispatchToProps)(Counter);
 ```
 
-````js
-class ContextUser extends Component {
-  render() {
-    return (
-      <MyContext.Consumer>
-        {balances => (
-          <div>
-            Balances can be used here.
-            For example:
-            There are {balances.length} accounts.
-          </div>
-        )}
-      </MyContext.Consumer>
-    )
-  }
-}
+---
+
+## Task 1 - what is happening here!?
+
+Task 1: Figure out what was done to this app and have a feel how it works
+ - Tool: https://chrome.google.com/webstore/detail/redux-devtools
+ - Task: Dispatch an action through the debugger to create an account
+
+---
+## First, let's find:
+   - react views and where data is rendered from store
+   - where actions are dispatched
+   - reducers and where data is entered to store
+---
+# Now let's look
+# at redux dev tools
+---
+
+## Workshop guidelines
+- Branch `task-X` (e.g. `task-1`) - starting point for a step
+- Work on `task-X` branch. Use `npm run test` to verify your solution.
+- Clueless? Branch `task-X-solution` (e.g. `task-1-solution`) contains an example solution
+
+---
+## Task 2 - Let's act on it.
+ Debugging is fun, but let's allow users to create users too.
+
+
+Branch: task-2
+
+
+### Task: Modify BankStats to have a button that creates an account
+
+
+Rules:
+   - use classname `new-account-button`
+   - connect action to a prop `openNewAccount`
+   - export mapDispatchToProps (this is full unit test coverage test)
+---
+
+## Let's look at my solution
+
+---
+## Task 3 - Who wants to be selected?
+
+Task: Display the number of accounts in Bank Stats - reintroducinng previous feature
+
+Let's do it without tests!
+
+Tools you'll learn to use: React update visualiser.
+https://chrome.google.com/webstore/detail/react-developer-tools
 
 ---
 
-<img src="./static/react-context.png" alt="React Context" />
+## Let's look at my bad solution
+## and see why it's bad
 
 ---
 
-export default SplitRight
-
-<div>
-  <Components.p>
-    Run tests using <Components.inlineCode>npm run test</Components.inlineCode>
-  </Components.p>
-  <Components.p>Feel free to ask questions</Components.p>
-  <br />
-  <Components.h3>Advanced topics</Components.h3>
-  <Components.ul>
-    <Components.li>
-      Redux
-      <br />
-      <Components.a href="https://redux.js.org/">
-        https://redux.js.org/
-      </Components.a>
-    </Components.li>
-  </Components.ul>
-</div>
-
-## `task-4`
-
-Use Context's `Consumer` to access the necessary functions/data.
-
-```notes
-Time to complete - 15 minutes
-````
+If you want to, test in branch `task-3-structured` will guide you to a nicer solution
 
 ---
 
-## `task-4-solution`
+## Let's look at proper solution
 
-Live coding
+---
+## Task 4 - There are too many accounts! Let's reduce them.
+
+Branch: task-4
+
+Task: implement reducer to remove an account, and add button to do it
+
+Rules:
+  - use a button with text "DELETE" inside `Counter`
+  - use action with type "DELETE" and attribute `id`
+
+Advanced: add unit tests for reducer
+---
+## Let's look at the solution
+
+---
+## Stretch goal tasks!
+ - Introduce action creators! (Important notion)
+ - Display number of accounts with balance > 100 in Bank Stats
+ - Click to select an account, then put the balance in Bank Stats
+ - Watch for rerenders!
+
+## Homework & future work
+
+ - where to put asynchronous operations ?
+ - how to manage selectors ?
 
 ---
 
