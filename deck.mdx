@@ -9,266 +9,301 @@ export { default as theme } from './theme'
 
 ---
 <Head>
-  <title>React State Management workshop using Redux </title>
+  <title>Typescript - basics, and a step ahead</title>
 </Head>
 
-# React State Management workshop using Redux
+# Typescript
 
-Prepared by Bartosz Lewiński (based on previous workshop by Grzegorz Rozdzialik)
+Prepared by Bartosz Lewiński
 
-Workshop repo: https://github.com/Blewin/react-redux-state-management-workshop
+Workshop repo: https://github.com/Blewin/typescript-workshop-exercises
 
 
 ---
 
-## What will we learn today?
-- Solving problems from previous workshops - THE REDUX WAY
-- Redux basic elements (actions, reducers, selectors)
-- Redux & React debugging
+## What will we learn
+0. What typescript is about
+1. Basic Typescripts
+2. Slightly advanced typescript tips and tricks
+  - algebraic data types
+  - generics
 
 ---
 
-## Problem we are solving - state management
+## Why
 
-Prop drilling can get out of hand.
-
-<img src="./static/prop-drilling.png"  style={{width:'40%'}}   alt="Prop drilling" />
-
-
-Redux is an excellent solution for big projects*
+Contracts
+<img src="./static/Design_by_contract.svg" style={{width:'200%'}} alt="design by contract" />
+---
+## simpler:
+Like a contract:
+- we have a client (API user) who wants something from contractor (a module)
+- client has to supply materials (input)
+- contractor has to deliver finished product (output) that satisfied specification
 
 ---
-
-## What will we do today
-
-We'll work on previous codebase - with Redux!
-We'll implement basic elements, and see how they interact.
-If time will allow - we'll go deeper!
-
----
-
-## Initial setup
-
-1. Pull the workshop repository: (ask for link in rocket chat)
 
 ```
-git clone git@github.com:Blewin/react-redux-state-management-workshop.git
-```
+interface Person {
+    firstName: string;
+    lastName: string;
+}
 
-2. `npm install`
-3. `npm start`
-4. Open [http://localhost:3000/](http://localhost:3000/)
-5. Explore the `src` directory
+function greeter(person: Person):String {
+    return "Hello, " + person.firstName + " " + person.lastName;
+}
 
-```notes
-Show auto-reload by modifying `src/App.js`.
+let user = { firstName: "Jane", lastName: "User" };
+console.log(greeter(user));
 ```
 
 ---
-### Unidirectional data flow
+<img src="./static/intellisense.png" style={{width:'100%'}} alt="intellisense" />
+---
 
-<img src="./static/simple-store.png"  style={{width:'70%'}}  alt="simple" />
+## How? Exercise 0
+```
+git clone git@github.com:Blewin/typescript-workshop-exercises.git
+npm install
+npm run compile
+#Check out the `dist` directory
+node build/src/hello.js #to run
+```
 
 ---
 
-## Redux Model
+## Basic types
 
-<img src="./static/adv-store.png"  style={{width:'65%'}}  alt="advanced" />
+ - Boolean
+ - Number
+ - String
+
+`let isDone: boolean = false`
+ - Arrays
+
+`const bestNumbers: number[] = [1,2,4];`
 ---
-## State in Redux
-```js
-{
-  party: {
-    isJumping: false,
-  },
-  accounts: {
-    alice: 20,
-    bob: -2,
-    charlie: 13,
-  }
+## Functions
+```
+type functionType = (argument: number) => string;
+const function = (argument: number): number => {
+  return argument+2;
 }
 ```
----
-## Actions in Redux
-
-```js
-dispatch({
-    type: 'JUMP'
-})
-```
-
-```js
-dispatch({
-    type: 'JOIN PARTY',
-    userId: 'alice'
-    payload: {
-        partyNr: 3,
-    }
-})
-```
----
-## Reducer
-
-```js
-function partyReducer(state = INITIAL_STATE, action) {
-  switch (action.type) {
-    case 'JUMP':
-      return {
-        ...state,
-        isJumping: true,
-      };
-
-    default:
-      return state;
-    }
-  }
-
-```
-
+## Special basic types
+ - void - return type of a function that returns nothing
+ - never - value that should not occur
+   `() => throw Error('Error World')§)
 ---
 
-# Before action was reduced
-```js
-dispatch({
-    type: 'JUMP'
-})
+## Exercise nr 1
+Exercise workflow:
+ - rename exercise1.ts.todo to exercise1.ts
+ - fix errors until `npm run compile` passes
 ```
+type helloPrinterType = never;
+const helloPrinter: helloPrinterType = (world) => console.log(`Hello ${world}`)
 
-```js
-{
-    isJumping: false,
-    isWild: true,
+type arrayMapperType = never;
+const arrayMapper: arrayMapperType = (array, fun) => array.map(fun);
+```
+---
+ - Javascript Objects
+```
+interface Box {
+    height: number;
+    width: number;
 }
-```
----
-# After action was reduced
-```js
-dispatch({
-    type: 'JUMP'
-})
-```
-```js
-{
-    isJumping: true,
-    isWild: true,
+
+type Arrow = {
+    color: string;
+    target: string:
 }
 ```
 ---
 
-## Connect
-
-```js
-function mapStateToProps(state, props) {
-  return {
-    value: state.accounts[props.userId],
-  }
+## Exercise nr 2
+```
+interface Person {
+    firstName: string;
+    lastName: string;
 }
 
-function mapDispatchToProps(dispatch, props) {
-  return {
-    onIncrement: () => dispatch({type: 'INCREMENT', id: props.userId}),
-    onDecrement: () => dispatch({type: 'DECREMENT', id: props.userId}),
-  }
+class Zbigniew implements Person {
+//tutaj zmiany
 }
 
-export const ConnectedCounter = connect(mapStateToProps, mapDispatchToProps)(Counter);
+class Franek extends Zbigniew {
+    //co tutaj potrzebne
+}
+
+console.log(new Zbigniew().firstName, new Franek().lastName);
+
+```
+---
+# types vs interfaces
+
+ - implements / extends (Interfaces are guaranteed extendable/implementable)
+ - interface merging
+
+---
+```
+interface Box {
+    height: number;
+    width: number;
+}
+
+interface Box {
+    scale: number;
+}
+
+let box: Box = {height: 5, width: 6, scale: 10};
+```
+
+---
+# intersection - "AND"
+```
+type MyProps = StateProps & OwnProps;
+
+type credentials = {name: string} & {password: string}
+
+```
+---
+# union - "OR"
+
+```
+type result = {
+  status: 'error' | 'success';
+  msg: string;
+}
+
+type result2 = {
+  status: 'error';
+  errorNumber: number;
+} | {
+  status: 'ok';
+  data: number[];
+}
+
+```
+---
+# Typeguardy
+```
+let pet = getSmallPet();
+
+// Each of these property accesses will cause an error
+if (pet.swim) {
+    pet.swim();
+}
+else if (pet.fly) {
+    pet.fly();
+}
+```
+---
+```
+function isFish(pet: Fish | Bird): pet is Fish {
+    return (<Fish>pet).swim !== undefined;
+}
+
+if (isFish(pet)) {
+    pet.swim();
+}
+else {
+    pet.fly();
+}
+```
+
+---
+# Exercise 3
+```
+interface Square {
+    kind: "square";
+    size: number;
+}
+interface Rectangle {
+    kind: "rectangle";
+    width: number;
+    height: number;
+}
+interface Circle {
+    kind: "circle";
+    radius: number;
+}
+```
+---
+
+# Exercise 4
+```
+type UserList = UserData[];
+type UserData = {
+  name: string,
+  favouriteIceCream: string,
+} | (
+ OfficialRecord & IceCreamData
+)
+type OfficialRecord = {firstname: string; lastname: string};
+type IceCreamData = {bestIceCream: string};
+
+const favouriteIceCreams = (userDataArray: UserList): string[] => {
+ //?
+}
 ```
 
 ---
 
-## Task 1 - what is happening here!?
+## Special basic types
 
-Task 1: Figure out what was done to this app and have a feel how it works
- - Tool: https://chrome.google.com/webstore/detail/redux-devtools
- - Task: Dispatch an action through the debugger to create an account
-
----
-
-## First, let's find:
-   - react views and where data is rendered from store
-   - where actions are dispatched
-   - reducers and where data is entered to store
----
-
-# Now let's look
-# at redux dev tools
+ - `any` - "turn off type checking"
+```
+let x: any = getDataFromAPI();
+x.data[3].run() // passes
+```
+ - `unknown` - watch me like a hawk when using it
+```
+let y: unknown = getDataFromAPI();
+if (typeof y === 'number'){
+  console.log(`I ate ${y} apples`)
+}
+```
 
 ---
+## Generic Types
 
-## Workshop guidelines
-- Branch `task-X` (e.g. `task-1`) - starting point for a step
-- Work on `task-X` branch. Use `npm run test` to verify your solution.
-- Clueless? Branch `task-X-solution` (e.g. `task-1-solution`) contains an example solution
+```
+ const identity = (x) => {return x };
 
+ const s: string = identity(2); //NO ERROR
+```
+---
+## generyki
+
+Lodash: Identity
+```
+ const identity = <T>(x): T => {return x };
+
+ const s: string = identity(2); //ERROR
+```
+---
+## Exercise 5
+```
+const sum = (a, b) => a + b;
+
+console.log(applyTwo(1, 2, sum);
+console.log(applyTwo(3, 5, sum);
+console.log(applyTwo('a', 'b', (a, b) => b + a + b + a);
+```
 ---
 
-## Task 2 - Let's act on it.
- Debugging is fun, but let's allow users to create users too.
 
+React - HOC
 
-Branch: task-2
-
-
-### Task: Modify BankStats to have a button that creates an account
-
-
-Rules:
-   - use classname `new-account-button`
-   - connect action to a prop `openNewAccount`
-   - export mapDispatchToProps (this is full unit test coverage test)
----
-
-## Let's look at my solution
+ - remember about contracts - type
+ - https://medium.com/@jrwebdev/react-higher-order-component-patterns-in-typescript-42278f7590fb
 
 ---
-## Task 3 - Who wants to be selected?
+# Sources & links:
 
-Task: Display the number of accounts in Bank Stats - reintroducinng previous feature
-
-Let's do it without tests!
-
-Tools you'll learn to use: React update visualiser.
-https://chrome.google.com/webstore/detail/react-developer-tools
-
----
-
-## Let's look at my bad solution
-## and see why it's bad
-
----
-
-If you want to, test in branch `task-3-structured` will guide you to a nicer solution
-
----
-
-## Let's look at proper solution
-
----
-## Task 4 - There are too many accounts! Let's reduce them.
-
-Branch: task-4
-
-Task: implement reducer to remove an account, and add button to do it
-
-Rules:
-  - use a button with text "DELETE" inside `Counter`
-  - use action with type "DELETE" and attribute `id`
-
-Advanced: add unit tests for reducer
----
-## Let's look at the solution
-
----
-## Stretch goal tasks!
- - Introduce action creators! (Important notion)
- - Display number of accounts with balance > 100 in Bank Stats
- - Click to select an account, then put the balance in Bank Stats
- - Watch for rerenders!
-
-## Homework & future work
-
- - where to put asynchronous operations ?
- - how to manage selectors ?
+https://medium.com/@martin_hotell/interface-vs-type-alias-in-typescript-2-7-2a8f1777af4c
 
 ---
 
